@@ -6,6 +6,7 @@
 @using System.Text;
 @using System.Net.Http;
 @inject HttpClient HttpClient
+@inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
 
 <h3>Edit Product</h3>
@@ -75,8 +76,8 @@
             // Handle the case where the update was not successful
             // You can display an error message or take other actions based on the response
             // For example:
-            // var errorMessage = await response.Content.ReadAsStringAsync();
-            // ShowErrorMessage("Failed to update the product: " + errorMessage);
+            var errorMessage = await response.Content.ReadAsStringAsync();
+            await JSRuntime.InvokeVoidAsync("Failed to update the product: " + errorMessage);
         }
     }
 }

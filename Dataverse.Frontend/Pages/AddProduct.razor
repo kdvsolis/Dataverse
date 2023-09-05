@@ -3,6 +3,7 @@
 @using Dataverse.Frontend.Models
 @using System.Net.Http.Json
 @inject HttpClient HttpClient
+@inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
 
 <h3>Add New Product</h3>
@@ -32,21 +33,18 @@
 
     private async Task AddNewProduct()
     {
-        // Send a POST request to the backend API to add the new product
         var response = await HttpClient.PostAsJsonAsync("api/products", newProduct);
 
         if (response.IsSuccessStatusCode)
         {
-            // Product added successfully, navigate back to the product list page
             NavigationManager.NavigateTo("/products");
         }
         else
         {
             // Handle the case where the addition was not successful
             // You can display an error message or take other actions based on the response
-            // For example:
-            // var errorMessage = await response.Content.ReadAsStringAsync();
-            // ShowErrorMessage("Failed to add the product: " + errorMessage);
+            var errorMessage = await response.Content.ReadAsStringAsync();
+            await JSRuntime.InvokeVoidAsync("Failed to add the product: " + errorMessage);
         }
     }
 }

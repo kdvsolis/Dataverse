@@ -1,7 +1,10 @@
 ﻿@page "/products"
 @using Dataverse.Frontend.Models;
 
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Forms
 @inject HttpClient HttpClient
+@inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager // Inject NavigationManager here
 
 
@@ -96,8 +99,10 @@
         }
         else
         {
-            // Handle error or display an error message
-            // Example: ShowErrorMessage("Failed to delete the product.");
+            // Handle error or display an error message     
+            var errorMessage = await response.Content.ReadAsStringAsync();
+            await JSRuntime.InvokeVoidAsync("showAlert", "Failed to delete the product." + errorMessage);
+
         }
     }
 }
