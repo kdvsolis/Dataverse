@@ -1,0 +1,103 @@
+﻿@page "/products"
+@using Dataverse.Frontend.Models;
+
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager // Inject NavigationManager here
+
+
+<h3>Product List</h3>
+
+<a href="/products/add" class="btn btn-success">Add New Product</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var product in products)
+        {
+            <tr>
+                <td>@product.Name</td>
+                <td>@product.Description</td>
+                <td>@product.Price.ToString("C")</td>
+                <td>
+                    <button class="btn btn-primary" @onclick="() => EditProduct(product)">Edit</button>
+                    <button class="btn btn-danger" @onclick="() => ConfirmDelete(product)">Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (isDeleteConfirmationVisible)
+{
+    <div class="modal fade show" tabindex="-1" role="dialog" style="display: block;">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Delete</h5>
+                    <button type="button" class="close" @onclick="CloseDeleteConfirmation">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this product?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseDeleteConfirmation">Cancel</button>
+                    <button type="button" class="btn btn-danger" @onclick="() => DeleteProduct(productToDelete)">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Product> products = new List<Product>();
+    private Product productToDelete;
+    private bool isDeleteConfirmationVisible = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Fetch the list of products from the backend API
+        products = await HttpClient.GetFromJsonAsync<List<Product>>("api/products");
+    }
+
+    private void EditProduct(Product product)
+    {
+        NavigationManager.NavigateTo($"/products/edit/{product.Id}");
+    }
+
+    private void ConfirmDelete(Product product)
+    {
+        productToDelete = product;
+        isDeleteConfirmationVisible = true;
+    }
+
+    private void CloseDeleteConfirmation()
+    {
+        isDeleteConfirmationVisible = false;
+    }
+
+    private async Task DeleteProduct(Product product)
+    {
+        var response = await HttpClient.DeleteAsync($"api/products/{product.Id}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            products.Remove(product);
+
+            isDeleteConfirmationVisible = false;
+        }
+        else
+        {
+            // Handle error or display an error message
+            // Example: ShowErrorMessage("Failed to delete the product.");
+        }
+    }
+}

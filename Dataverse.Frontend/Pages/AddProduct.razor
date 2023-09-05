@@ -1,0 +1,52 @@
+﻿@page "/products/add"
+
+@using Dataverse.Frontend.Models
+@using System.Net.Http.Json
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+
+<h3>Add New Product</h3>
+
+<EditForm Model="newProduct" OnValidSubmit="AddNewProduct">
+    <DataAnnotationsValidator />
+    <div class="form-group">
+        <label for="Name">Name</label>
+        <InputText id="Name" class="form-control" @bind-Value="newProduct.Name" />
+        <ValidationMessage For="() => newProduct.Name" />
+    </div>
+    <div class="form-group">
+        <label for="Description">Description</label>
+        <InputText id="Description" class="form-control" @bind-Value="newProduct.Description" />
+        <ValidationMessage For="() => newProduct.Description" />
+    </div>
+    <div class="form-group">
+        <label for="Price">Price</label>
+        <InputNumber id="Price" class="form-control" @bind-Value="newProduct.Price" />
+        <ValidationMessage For="() => newProduct.Price" />
+    </div>
+    <button type="submit" class="btn btn-success">Save</button>
+</EditForm>
+
+@code {
+    private Product newProduct = new Product();
+
+    private async Task AddNewProduct()
+    {
+        // Send a POST request to the backend API to add the new product
+        var response = await HttpClient.PostAsJsonAsync("api/products", newProduct);
+
+        if (response.IsSuccessStatusCode)
+        {
+            // Product added successfully, navigate back to the product list page
+            NavigationManager.NavigateTo("/products");
+        }
+        else
+        {
+            // Handle the case where the addition was not successful
+            // You can display an error message or take other actions based on the response
+            // For example:
+            // var errorMessage = await response.Content.ReadAsStringAsync();
+            // ShowErrorMessage("Failed to add the product: " + errorMessage);
+        }
+    }
+}
